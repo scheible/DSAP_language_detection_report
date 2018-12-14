@@ -68,7 +68,12 @@ In our project, we explore two different approaches, Phoneme Statistical Analysi
 
 The report is structured in the following way: In Sect 2 we introduce the system of PSA. The approach with DNN will be shown in Sect.3. Finally, in Sect. 4 we conclude our work with comparison of both systems. 
 
-\subsection{Phonemetic Statistical Approach}
+\section{Phoneme Statistical Analysis}
+\subsection{Technique}
+The first step in this approach is to convert all audio files in the training set into their corresponding phonemes using the framework CMU Sphinx \cite{lamere2003cmu}. Since the project scope does not allow to create a neutral language model for CMU Sphinx the standard American English model is used. Thus rather low performance of the actual phoneme recognition can be assumed \cite{kepuska2017comparing}. However the goal is to identify a language even with a bad phoneme recogniser. The output of this step is one text file per language containing the phonemes of one sample in each line.
+
+In the second step, n-grams of the phonemes of each language are computed. \cite{matejka2005phonotactic} used 3-grams to model a language however this requires more training data than for this project is available. Therefore histograms (1-grams) and 2-grams are considered.
+
 \vfill\pagebreak
 
 \section{Deep Neural Networks}
@@ -113,7 +118,7 @@ To improve it, we implemented data augmentation, as explained in Section \ref{su
 % BiBTeX files (here: strings, refs, manuals). The IEEEbib.bst bibliography
 % style file from IEEE produces unsorted bibliography list.
 % -------------------------------------------------------------------------
-%\bibliographystyle{IEEEbib}
-%\bibliography{strings,refs}
+\bibliographystyle{IEEEbib}
+\bibliography{strings,refs}
 
 \end{document}
