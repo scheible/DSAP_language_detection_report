@@ -65,12 +65,13 @@ Language Detection, Phonemes, CMUSphinx,
 
 \section{Deep Neural Networks}
 \label{sec:dnn}
-v
-We tried to solve the problem of language identification using two architectures of Deep Neural Networks. We ran the networks using the \emph{Mel-frequency cepstrum coefficients} (MFCC) representation.
+In this section we identify the spoken language with two architectures of Deep Neural Networks. At first stage we extract the audio features as \emph{Mel-frequency cepstral coefficients} (MFCC) representation using the librosa library. The librosa library was also used to perform data augmentation.
+ 
+Then the MFCCs are used as input for the CRNN created with the Keras framework.
 
 \subsection{Techniques}
 \label{subsec:dnn-tech}
-We represented the audio samples using MFCCs with 40 bands. These were extracted using the mfcc function included in the librosa library.
+We represented the audio samples using MFCCs with 40 bands. The resulting matrices have a shape of $(40, 443)$.
 
 To limit the \emph{overfitting} problem, we also implemented \emph{data augmentation} producing, for each input file in the training set, three versions differing in the speed of the voice: the original file, a version with a slight slowdown and another one slightly faster. To easily feed the network with these data, we cropped the longer files (the slower ones) and zero padded the faster, producing at the end matrices with a fixed shape.
 
