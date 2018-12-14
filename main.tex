@@ -59,10 +59,18 @@ One, two, three, four, five
 %
 \section{Introduction}
 \label{sec:intro}
+Spoken language identification is to classify the spoken language from a given audio sample, which is typically the first step for language processing tasks. Without spoken language detection, speech utterances cannot be analyzed correctly and the grammar rules cannot be applied. As with speech recognition, humans can perform the most accurate language identification. Within a few seconds of hearing, people are able to identify if they have prior knowledge of this language. In the other case, people can just make subjective judgements to the similarity of the language they know.
+
+There are several critical applications for spoken language identification, such as international emergency call for urgent occasions and language predefined for intelligent assistants like Siri. 
+Thus, a spoken language identification system should be developed for such cases.
+
+In our project, we explore two different approaches, Phoneme Statistical Analysis (PSA) and Deep Neural Network (DNN), to identifying the language of speech. Five languages, Arabic, Dutch, Korean, Polish and Romanian from Topcoder are used as database. The inputs are 10  seconds audio segment files in type of “wav.” and outputs are the label of the language. In the PSA approach, we extract the phonemes and build a statistical analysis model for each language. While in DNN approach, we transform information from the audio signal to Mel-frequency Cepstral Coefficients (MFCC) and use Convolutional Neural Network (CNN) combined with Recurrent Neural Network (RNN) to train the system.
+
+The report is structured in the following way: In Sect 2 we introduce the system of PSA. The approach with DNN will be shown in Sect.3. Finally, in Sect. 4 we conclude our work with comparison of both systems. 
 
 \section{Technique}
 
-\subsection{Phonemetic Statistical Approach}
+\subsection{Phoneme Statistical Analysis}
 \vfill\pagebreak
 
 \section{REFERENCES}
