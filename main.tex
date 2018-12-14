@@ -66,15 +66,31 @@ Thus, a spoken language identification system should be developed for such cases
 
 In our project, we explore two different approaches, Phoneme Statistical Analysis (PSA) and Deep Neural Network (DNN), to identifying the language of speech. Five languages, Arabic, Dutch, Korean, Polish and Romanian from Topcoder are used as database. The inputs are 10  seconds audio segment files in type of “wav.” and outputs are the label of the language. In the PSA approach, we extract the phonemes and build a statistical analysis model for each language. While in DNN approach, we transform information from the audio signal to Mel-frequency Cepstral Coefficients (MFCC) and use Convolutional Neural Network (CNN) combined with Recurrent Neural Network (RNN) to train the system.
 
-The report is structured in the following way: In Sect 2 we introduce the system of PSA. The approach with DNN will be shown in Sect.3. Finally, in Sect. 4 we conclude our work with comparison of both systems. 
+The report is structured in the following way: In Sect 2 we introduce the system of PSA. The approach with DNN will be shown in Sect. 3. Finally, in Sect. 4 we conclude our work with comparison of both systems. 
 
 \section{Phoneme Statistical Analysis}
 \subsection{Technique}
-The first step in this approach is to convert all audio files in the training set into their corresponding phonemes using the framework CMU Sphinx \cite{lamere2003cmu}. Since the project scope does not allow to create a neutral language model for CMU Sphinx the standard American English model is used. Thus rather low performance of the actual phoneme recognition can be assumed \cite{kepuska2017comparing}. However the goal is to identify a language even with a bad phoneme recogniser. The output of this step is one text file per language containing the phonemes of one sample in each line.
+The first step in this approach is to convert all audio files in the training set into their corresponding phonemes using the framework CMU Sphinx \cite{lamere2003cmu} and Python. Since the project scope does not allow to create a neutral language model for CMU Sphinx the standard American English model is used. Thus rather low performance of the actual phoneme recognition can be expected \cite{kepuska2017comparing}. However our assumption is that a certain language produces a specific pattern of phonemes even though these phonemes are not the real phonemes of the utterance. Thus the real phonemes are not of interest, just the pattern of (wrong) phonemes a certain language produces in this phoneme recogniser. The output of this step is one text file per language containing the phonemes of one sample in each line.
 
-In the second step, n-grams of the phonemes of each language are computed. \cite{matejka2005phonotactic} used 3-grams to model a language however this requires more training data than for this project is available. Therefore histograms (1-grams) and 2-grams are considered.
+In the second step, n-grams of the phonemes of each language are computed. \cite{matejka2005phonotactic} used 3-grams to model a language, however this requires more training data than for this project is available. Therefore histograms (1-grams) and 2-grams are considered.
 
-\vfill\pagebreak
+After training the model, the phonemes of a data sample have to be compared to the statistical models of each language. This can be done by computing the likelihood of the sample per language \cite{matejka2005phonotactic} as in equation (\ref{equ:likelihood}) with $\theta$ being the language, $x$ being the sample, $x_i$ being the i\textit{th} phoneme of sample $x$ and $p_{\theta}(\cdot)$ being the histogram of the language $\theta$.
+
+\begin{equation}
+\label{equ:likelihood}
+    \mathcal{L}(\theta | x) = \prod p_{\theta}(x_i)
+\end{equation}
+
+A second method for comparison with the likelihood is to calculate the Kullback-Leibler Distance between the models histogram and the sample's histogram as shown in equation (\ref{equ:kullback-leibler}) where $P$ is the model's histogram and $Q$ is the sample's histogram.
+
+\begin{equation}
+\label{equ:kullback-leibler}
+    D(P || Q) = - \sum_{i} P(i) log\left(\frac{Q(i)}{P(i)}\right)
+\end{equation}
+
+Finally the language with the highest likelihood or with the lowest distance is selected as the estimation.
+
+\subsection{Experiment}
 
 \section{Deep Neural Networks}
 \label{sec:dnn}
