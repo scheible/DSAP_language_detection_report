@@ -109,6 +109,23 @@ The first paragraph in each section should not be indented, but all the
 following paragraphs within the section should be indented as these paragraphs
 demonstrate.
 
+\section{Deep Neural Networks}
+\label{sec:dnn}
+
+We tried to solve the problem of language identification using two architectures of Deep Neural Networks. We ran the networks using the \emph{Mel-frequency cepstrum coefficients} (MFCC) representation.
+
+\subsection{Techniques}
+\label{subsec:dnn-tech}
+We represented the audio samples using MFCCs with 40 bands. These were extracted using the mfcc function included in the librosa library.
+
+To limit the \emph{overfitting} problem, we also implemented \emph{data augmentation} producing, for each input file in the training set, three versions differing in the speed of the voice: the original file, a version with a slight slowdown and another one slightly faster. To easily feed the network with these data, we cropped the longer files (the slower ones) and zero padded the faster, producing at the end matrices with a fixed shape.
+
+There was also the possibility that the resulting MFCCs had a resolution too high in time, that would have made the training of the neural network too slow, so we thought to the possibility of reducing the dimensionality in time domain. In fact, that was not the case, with a training time taking around \SI{35}{\milli\second} per step. 
+
+For what concerns the neural networks, we tried two types of them: a more classical \emph{Convolutional Neural Network} (CNN), and a \emph{Convolutional Recurrent Neural Network} (CRNN), that is a CNN with one or more \emph{Long Short Term Memory} layers after the convolutional part and before the fully connected layers.
+
+In both cases we used three convolutional layers followed each by a maxpooling layer, two dense layers and a dropout layer to reduce overfitting. For the CRNN we added an LSTM layer after the convolutional layers and before the fully connected ones.
+
 \section{MAJOR HEADINGS}
 \label{sec:majhead}
 
