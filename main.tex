@@ -82,12 +82,28 @@ Then the MFCCs are used as input for the CRNN created with the Keras framework.
 We represented the audio samples using MFCCs with 40 bands. The resulting matrices have a shape of $(40, 443)$.
 
 To limit the \emph{overfitting} problem, we also implemented \emph{data augmentation} producing, for each input file in the training set, three versions differing in the speed of the voice: the original file, a version with a slight slowdown and another one slightly faster. To easily feed the network with these data, we cropped the longer files (the slower ones) and zero padded the faster, producing at the end matrices with a fixed shape.
+Eventually, the three versions have a relative speeds of $0.9$, $1$ and $1.1$ times the original version.
 
 There was also the possibility that the resulting MFCCs had a resolution too high in time, that would have made the training of the neural network too slow, so we thought to the possibility of reducing the dimensionality in time domain. In fact, that was not the case, with a training time taking around \SI{35}{\milli\second} per step. 
 
 For what concerns the neural networks, we tried two types of them: a more classical \emph{Convolutional Neural Network} (CNN), and a \emph{Convolutional Recurrent Neural Network} (CRNN), that is a CNN with one or more \emph{Long Short Term Memory} layers after the convolutional part and before the fully connected layers.
 
 In both cases we used three convolutional layers followed each by a maxpooling layer, two dense layers and a dropout layer to reduce overfitting. For the CRNN we added an LSTM layer after the convolutional layers and before the fully connected ones.
+
+\subsection{Experiments}
+\label{subsec:dnn-experiments}
+
+\subsubsection{Convolutional Neural Network}
+As a first attempt, we tried to implement a standard CNN with 3 blocks with configuration of neurons 32-32-64, composed each by a Convolutional layer with filters of size $3\times 3$ and a maxpooling layer with stride 2, at the end two fully connected layers with size 64 and 5 for the output and a \emph{dropout} layer between them.
+
+We chose the \emph{ReLU} as the activation function and \emph{RMSprop} as optimizer. The loss function is the \emph{categorical cross-entropy}.
+
+After 20 epochs of training over the non-augmented dataset, this model reached an accuracy of SI{89.7}{\percent} on the test set.
+This result is affected by overfitting, as at the last epoch, the accuracy on the training set gets over \SI{98}{\percent}.
+
+To improve it, we implemented data augmentation, as explained in Section \ref{subsec:dnn-tech}. We also split the dataset in three sets: one for training, one for validation
+
+\subsubsection{Convolutional Recurrent Neural Network}
 
 \section{REFERENCES}
 \label{sec:refs}
