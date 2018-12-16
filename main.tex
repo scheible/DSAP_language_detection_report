@@ -17,7 +17,7 @@
 % Single address.
 % ---------------
 \name{Quentin Deleuil, Gianmarco Garrisi, Qianyun Hu, Patrik Scheible \thanks{Thanks to XYZ agency for funding.}}
-\address{patrikscheible@posteo.net, quentin.deleuil@gmail.com }
+\address{quentin.deleuil@gmail.com, s212260@studenti.polito.it, patrikscheible@posteo.net, }
 %
 % For example:
 % ------------
@@ -54,213 +54,173 @@ in black ink.
 \end{abstract}
 %
 \begin{keywords}
-One, two, three, four, five
+Language Identification, Phonemes, CMUSphinx,
 \end{keywords}
 %
 \section{Introduction}
 \label{sec:intro}
+Spoken language identification is to classify the spoken language from a given audio sample, which is typically the first step for language processing tasks. Without spoken language detection, speech utterances cannot be analyzed correctly and the grammar rules cannot be applied. As with speech recognition, humans can perform the most accurate language identification.\cite{shi2006importance} Within a few seconds of hearing, people are able to identify if they have prior knowledge of this language. In the other case, people can just make subjective judgements to the similarity of the language they know.
 
-These guidelines include complete descriptions of the fonts, spacing, and
-related information for producing your proceedings manuscripts. Please follow
-them and if you have any questions, direct them to Conference Management
-Services, Inc.: Phone +1-979-846-6800 or email
-to \\\texttt{papers@icassp2016.org}.
+There are several critical applications for spoken language identification, such as international emergency call for urgent occasions and language predefined for intelligent assistants like Siri. 
+Thus, a spoken language identification system should be developed for such cases.
 
-\section{Formatting your paper}
-\label{sec:format}
+In our project, we explore two different approaches, Phoneme Statistical Analysis (PSA) and Deep Neural Network (DNN), to identifying the language of speech. Five languages, Arabic, Dutch, Korean, Polish and Romanian from Topcoder are used as database. The inputs are 10  seconds audio segment files in type of “wav.” and outputs are the label of the language. In the PSA approach, we extract the phonemes and build a statistical analysis model for each language. While in DNN approach, we transform information from the audio signal to Mel-frequency Cepstral Coefficients (MFCC) and use Convolutional Neural Network (CNN) combined with Recurrent Neural Network (RNN) to train the system.
 
-All printed material, including text, illustrations, and charts, must be kept
-within a print area of 7 inches (178 mm) wide by 9 inches (229 mm) high. Do
-not write or print anything outside the print area. The top margin must be 1
-inch (25 mm), except for the title page, and the left margin must be 0.75 inch
-(19 mm).  All {\it text} must be in a two-column format. Columns are to be 3.39
-inches (86 mm) wide, with a 0.24 inch (6 mm) space between them. Text must be
-fully justified.
+The report is structured in the following way: In Section~\ref{sec:psa} we introduce the system of PSA. The approach with DNN will be shown in Section~\ref{sec:dnn}. Finally, in Section~\ref{sec:conclusion} we conclude our work with comparison of both systems. 
 
-\section{PAGE TITLE SECTION}
-\label{sec:pagestyle}
+\section{Dataset}
+\label{sec:dataset}
 
-The paper title (on the first page) should begin 1.38 inches (35 mm) from the
-top edge of the page, centered, completely capitalized, and in Times 14-point,
-boldface type.  The authors' name(s) and affiliation(s) appear below the title
-in capital and lower case letters.  Papers with multiple authors and
-affiliations may require two or more lines for this information. Please note
-that papers should not be submitted blind; include the authors' names on the
-PDF.
+\section{Phoneme Statistical Analysis}
+\label{sec:psa}
+\subsection{Techniques}
+The first step in this approach is to convert all audio files in the training set into their corresponding phonemes using the framework CMU Sphinx \cite{lamere2003cmu} and Python. Since the project scope does not allow to create a neutral language model for CMU Sphinx the standard American English model is used. Thus rather low performance of the actual phoneme recognition can be expected \cite{kepuska2017comparing}. However our assumption is that a certain language produces a specific pattern of phonemes even though these phonemes are not the real phonemes of the utterance. Thus the real phonemes are not of interest, just the pattern of (wrong) phonemes a certain language produces in this phoneme recogniser. The output of this step is one text file per language containing the phonemes of one sample in each line.
 
-\section{TYPE-STYLE AND FONTS}
-\label{sec:typestyle}
+In the second step, n-grams of the phonemes of each language are computed. \cite{matejka2005phonotactic} used 3-grams to model a language, however this requires more training data than for this project is available. Therefore histograms (1-grams) and 2-grams are considered.
 
-To achieve the best rendering both in printed proceedings and electronic proceedings, we
-strongly encourage you to use Times-Roman font.  In addition, this will give
-the proceedings a more uniform look.  Use a font that is no smaller than nine
-point type throughout the paper, including figure captions.
+After training the model, the phonemes of a data sample have to be compared to the statistical models of each language. This can be done by computing the likelihood of the sample per language \cite{matejka2005phonotactic} as in equation (\ref{equ:likelihood}) with $\theta$ being the language, $x$ being the sample, $x_i$ being the i\textit{th} phoneme of sample $x$ and $p_{\theta}(\cdot)$ being the histogram of the language $\theta$.
 
-In nine point type font, capital letters are 2 mm high.  {\bf If you use the
-smallest point size, there should be no more than 3.2 lines/cm (8 lines/inch)
-vertically.}  This is a minimum spacing; 2.75 lines/cm (7 lines/inch) will make
-the paper much more readable.  Larger type sizes require correspondingly larger
-vertical spacing.  Please do not double-space your paper.  TrueType or
-Postscript Type 1 fonts are preferred.
+\begin{equation}
+\label{equ:likelihood}
+    \mathcal{L}(\theta | x) = \prod p_{\theta} (x_i)
+\end{equation}
 
-The first paragraph in each section should not be indented, but all the
-following paragraphs within the section should be indented as these paragraphs
-demonstrate.
+A second method for comparison with the likelihood is to calculate the Kullback-Leibler Distance between the models histogram and the sample's histogram as shown in Equation~(\ref{equ:kullback-leibler}) where $P$ is the model's histogram and $Q$ is the sample's histogram.
 
-\section{MAJOR HEADINGS}
-\label{sec:majhead}
+\begin{equation}
+\label{equ:kullback-leibler}
+    D(P || Q) = - \sum_{i} P(i) log\left(\frac{Q(i)}{P(i)}\right)
+\end{equation}
 
-Major headings, for example, "1. Introduction", should appear in all capital
-letters, bold face if possible, centered in the column, with one blank line
-before, and one blank line after. Use a period (".") after the heading number,
-not a colon.
+Finally the language with the highest likelihood or with the lowest distance is selected as the estimation.
 
-\subsection{Subheadings}
-\label{ssec:subhead}
+\subsection{Experiments}
 
-Subheadings should appear in lower case (initial word capitalized) in
-boldface.  They should start at the left margin on a separate line.
- 
-\subsubsection{Sub-subheadings}
-\label{sssec:subsubhead}
+After training 1-gram models, the distance between the language models can give some initial insight if they represent good models for discrimination. Figure~\ref{fig:distance_between_languages} is a plot that shows the Kullback-Leibler distance (Equation~(\ref{equ:kullback-leibler})) between each of the models. For instance it reveals that Arabic and Polish are more different than Korean and Romanian.
 
-Sub-subheadings, as in this paragraph, are discouraged. However, if you
-must use them, they should appear in lower case (initial word
-capitalized) and start at the left margin on a separate line, with paragraph
-text beginning on the following line.  They should be in italics.
-
-\section{PRINTING YOUR PAPER}
-\label{sec:print}
-
-Print your properly formatted text on high-quality, 8.5 x 11-inch white printer
-paper. A4 paper is also acceptable, but please leave the extra 0.5 inch (12 mm)
-empty at the BOTTOM of the page and follow the top and left margins as
-specified.  If the last page of your paper is only partially filled, arrange
-the columns so that they are evenly balanced if possible, rather than having
-one long column.
-
-In LaTeX, to start a new column (but not a new page) and help balance the
-last-page column lengths, you can use the command ``$\backslash$pagebreak'' as
-demonstrated on this page (see the LaTeX source below).
-
-\section{PAGE NUMBERING}
-\label{sec:page}
-
-Please do {\bf not} paginate your paper.  Page numbers, session numbers, and
-conference identification will be inserted when the paper is included in the
-proceedings.
-
-\section{ILLUSTRATIONS, GRAPHS, AND PHOTOGRAPHS}
-\label{sec:illust}
-
-Illustrations must appear within the designated margins.  They may span the two
-columns.  If possible, position illustrations at the top of columns, rather
-than in the middle or at the bottom.  Caption and number every illustration.
-All halftone illustrations must be clear black and white prints.  Colors may be
-used, but they should be selected so as to be readable when printed on a
-black-only printer.
-
-Since there are many ways, often incompatible, of including images (e.g., with
-experimental results) in a LaTeX document, below is an example of how to do
-this \cite{Lamp86}.
-
-\section{FOOTNOTES}
-\label{sec:foot}
-
-Use footnotes sparingly (or not at all!) and place them at the bottom of the
-column on the page on which they are referenced. Use Times 9-point type,
-single-spaced. To help your readers, avoid using footnotes altogether and
-include necessary peripheral observations in the text (within parentheses, if
-you prefer, as in this sentence).
-
-% Below is an example of how to insert images. Delete the ``\vspace'' line,
-% uncomment the preceding line ``\centerline...'' and replace ``imageX.ps''
-% with a suitable PostScript file name.
-% -------------------------------------------------------------------------
-\begin{figure}[htb]
-
-\begin{minipage}[b]{1.0\linewidth}
-  \centering
-  \centerline{\includegraphics[width=8.5cm]{image1}}
-%  \vspace{2.0cm}
-  \centerline{(a) Result 1}\medskip
-\end{minipage}
-%
-\begin{minipage}[b]{.48\linewidth}
-  \centering
-  \centerline{\includegraphics[width=4.0cm]{image3}}
-%  \vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
-\end{minipage}
-\hfill
-\begin{minipage}[b]{0.48\linewidth}
-  \centering
-  \centerline{\includegraphics[width=4.0cm]{image4}}
-%  \vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
-\end{minipage}
-%
-\caption{Example of placing a figure with experimental results.}
-\label{fig:res}
-%
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{img/kullback-leibler_5languages.pdf}
+    \caption{Kullback-Leibler Distance between the trained models.}
+    \label{fig:distance_between_languages}
 \end{figure}
 
+In the next step the two distance functions are evaluated on the test set. Here both, equation~(\ref{equ:likelihood})~and~(\ref{equ:kullback-leibler}) yield exactly the same confusion matrix, given in Table~\ref{tab:confusion_matrix_psa}. The accuracy is 93.27\,\%.
 
-% To start a new column (but not a new page) and help balance the last-page
-% column length use \vfill\pagebreak.
-% -------------------------------------------------------------------------
-%\vfill
-%\pagebreak
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{ l | r r r r r }
+          & Arabic & Dutch & Korean & Polish & Rom.\\
+\hline
+ Arabic   & 112    & 0     & 0      & 0      & 1\\
+ Dutch    & 3      & 106   & 1      & 0      & 3\\
+ Korean   & 2      & 0     & 99     & 5      & 7\\
+ Polish   & 0      & 0     & 1      & 105    & 7\\
+ Romanian & 0      & 4     & 3      & 1     & 105\\
+\end{tabular}
+\end{center}
+\caption{Confusion Matrix with PSA using Kullback-Leibler distance and Likelihood (both yield the same matrix). }
+\label{tab:confusion_matrix_psa}
+\end{table}
 
-\section{COPYRIGHT FORMS}
-\label{sec:copyright}
+Conducting the same experiments with 2-gram models yields an accuracy of only 55.22\,\%. For example the Polish language model contains 1763 2-grams. However it contains 274 2-grams that are not present and 231 2-grams that only appeared once in the training set. This is an indication that not enough training data was used to get a true realisation of the underlying statistic.
 
-You must submit your fully completed, signed IEEE electronic copyright release
-form when you submit your paper. We {\bf must} have this form before your paper
-can be published in the proceedings.
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{ l | r r r r r }
+          & Arabic & Dutch & Korean & Polish & Rom.\\
+\hline
+ Arabic   & 87    & 1     & 0      & 2      & 9\\
+ Dutch    & 0      & 100   & 1      & 5      & 0\\
+ Korean   & 2      & 0     & 102     & 1      & 0\\
+ Polish   & 2      & 8     & 1      & 88    & 2\\
+ Romanian & 1      & 0     & 0      & 1     & 101\\
+\end{tabular}
+\end{center}
+\caption{Confusion Matrix with CRNN}
+\label{tab:confusion_matrix_crnn}
+\end{table}
 
-\section{RELATION TO PRIOR WORK}
-\label{sec:prior}
+\section{Deep Neural Networks}
+\label{sec:dnn}
+In this section we identify the spoken language with two architectures of Deep Neural Networks. At first stage we extract the audio features as \emph{Mel-frequency cepstral coefficients} (MFCC) representation using the librosa library. The librosa library was also used to perform data augmentation.
+ 
+Then the MFCCs are used as input for the CRNN created with the Keras framework.
 
-The text of the paper should contain discussions on how the paper's
-contributions are related to prior work in the field. It is important
-to put new work in  context, to give credit to foundational work, and
-to provide details associated with the previous work that have appeared
-in the literature. This discussion may be a separate, numbered section
-or it may appear elsewhere in the body of the manuscript, but it must
-be present.
+\subsection{Techniques}
+\label{subsec:dnn-tech}
+We represented the audio samples using MFCCs with 40 bands. The resulting matrices have a shape of $(40, 443)$.
 
-You should differentiate what is new and how your work expands on
-or takes a different path from the prior studies. An example might
-read something to the effect: "The work presented here has focused
-on the formulation of the ABC algorithm, which takes advantage of
-non-uniform time-frequency domain analysis of data. The work by
-Smith and Cohen \cite{Lamp86} considers only fixed time-domain analysis and
-the work by Jones et al \cite{C2} takes a different approach based on
-fixed frequency partitioning. While the present study is related
-to recent approaches in time-frequency analysis [3-5], it capitalizes
-on a new feature space, which was not considered in these earlier
-studies."
+To limit the \emph{overfitting} problem, we also implemented \emph{data augmentation} producing, for each input file in the training set, three versions differing in the speed of the voice: the original file, a version with a slight slowdown and another one slightly faster. To easily feed the network with these data, we cropped the longer files (the slower ones) and zero padded the faster, producing at the end matrices with a fixed shape.
+Eventually, the three versions have a relative speeds of $0.9$, $1$ and $1.1$ times the original version.
 
-\vfill\pagebreak
+There was also the possibility that the resulting MFCCs had a resolution too high in time, that would have made the training of the neural network too slow, so we thought to the possibility of reducing the dimensionality in time domain. In fact, that was not the case, with a training time taking around \SI{35}{\milli\second} per step. 
 
-\section{REFERENCES}
-\label{sec:refs}
+For what concerns the neural networks, we tried two types of them: a more classical \emph{Convolutional Neural Network} (CNN), and a \emph{Convolutional Recurrent Neural Network} (CRNN), that is a CNN with one or more \emph{Long Short-term Memory} layers after the convolutional part and before the fully connected layers. Long short-term memory (LSTM) units are units of a recurrent neural network (RNN) . A LSTM unit composed a cell, an input gate, an outpu gate and forget gate. It is well-suited to classifying based on time series data.
 
-List and number all bibliographical references at the end of the
-paper. The references can be numbered in alphabetic order or in
-order of appearance in the document. When referring to them in
-the text, type the corresponding reference number in square
-brackets as shown at the end of this sentence \cite{C2}. An
-additional final page (the fifth page, in most cases) is
-allowed, but must contain only references to the prior
-literature.
+In both cases we used three convolutional layers followed each by a maxpooling layer, two dense layers and a dropout layer to reduce overfitting. For the CRNN we added an LSTM layer after the convolutional layers and before the fully connected ones. 
+
+\subsection{Experiments}
+\label{subsec:dnn-experiments}
+
+\subsubsection{Convolutional Neural Network}
+As a first attempt, we tried to implement a standard CNN with 3 blocks with configuration of neurons 32-32-64, composed each by a Convolutional layer with filters of size $3\times 3$ and a maxpooling layer with stride 2, at the end two fully connected layers with size 64 and 5 for the output and a \emph{dropout} layer between them.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{img/cnn_figure.PNG}
+    \caption{Convolutional Neural Network model}
+    \label{fig:CNN model}
+\end{figure}
+
+We chose the \emph{ReLU} as the activation function and \emph{RMSprop} as optimizer. The loss function is the \emph{categorical cross-entropy}. The dataset has been split between a training set and a test set respectively equal to the \SI{70}{\percent} and \SI{30}{\percent}.
+
+After 20 epochs of training over the non-augmented dataset, this model reached an accuracy of SI{89.7}{\percent} on the test set.
+Dispite the dropout layer, this result is affected by overfitting. At the last epoch in fact, the accuracy on the training set gets over \SI{98}{\percent}.
+
+To improve it, we implemented data augmentation, as explained in Section \ref{subsec:dnn-tech}. We also split the dataset into three sets: one for training, one for validation and one for the testing phase with a proporttion of \SI{56}{\percent}, \SI{14}{\percent}  and \SI{30}{\percent}. We used a technique to save the weights of the best network according to the value of the loss function on the validation set. We later use the best model for the evaluation phase.
+
+We were able to train the network for 30 epochs without overfitting reaching an accuracy of over \SI{95}{\percent} on the validation set and  on the test set.
+
+From the confusion matrix results that our network is very good at detecting Korean and Romanian.
+
+\subsubsection{Convolutional Recurrent Neural Network}
+To improve the network, based on the CNN structure, we implement a Long Short-Term Memory (LSTM) layer with 64 neurons. The accuracy improve to \SI{93.75}{\percent}
+
+To improve the network, based on the CNN structure, we implement a Long Short-Term Memory (LSTM) layer with 64 neurons. 
+The accuracy improve to 93.75\%, training the network on the augmented dataset.
+Because of the network architecture and the software implementation we have to discard a small part of the sets. It is a number of samples less than the number of elements in a minibatch and is distributed among all the languages.
+
+In our case this amounts to less then 64 samples, which should not impact the overall performance of the network.
+
+All the obtained results are reported in \tablename~\ref{tab:dnn-acc-comp}. The confusion matrix for the CRNN is in \tablename~\ref{tab:confusion_matrix_crnn}.
+
+\begin{table}
+  \begin{tabular}{lcr}
+    \toprule
+    Architecture & Data augmentation & Accuracy (si{\percent}) \\
+    \midrule
+    Convolutional & No & 89.7 \\
+    Convolutional & Yes & 95.17 \\
+    Convolutional Recurrent & Yes & 93.75 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Comparison of accuracy between different networks}\label{tab:dnn-acc-comp}
+\end{table}
+
+\section{Conclusions}
+\label{sec:conclusion}
+
+In this project we proposed two spoken language identification systems for five languages from different language families. In the PSA system, we extract phonemes and build a statistical model for each language. While in the DNN system, we 
+ 
+%\section{REFERENCES}
+%\label{sec:refs}
+
 
 % References should be produced using the bibtex program from suitable
 % BiBTeX files (here: strings, refs, manuals). The IEEEbib.bst bibliography
 % style file from IEEE produces unsorted bibliography list.
 % -------------------------------------------------------------------------
 \bibliographystyle{IEEEbib}
-\bibliography{strings,refs}
+\bibliography{refs}
 
 \end{document}
