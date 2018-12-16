@@ -54,22 +54,26 @@ in black ink.
 \end{abstract}
 %
 \begin{keywords}
-Language Detection, Phonemes, CMUSphinx,
+Language Identification, Phonemes, CMUSphinx,
 \end{keywords}
 %
 \section{Introduction}
 \label{sec:intro}
-Spoken language identification is to classify the spoken language from a given audio sample, which is typically the first step for language processing tasks. Without spoken language detection, speech utterances cannot be analyzed correctly and the grammar rules cannot be applied. As with speech recognition, humans can perform the most accurate language identification. Within a few seconds of hearing, people are able to identify if they have prior knowledge of this language. In the other case, people can just make subjective judgements to the similarity of the language they know.
+Spoken language identification is to classify the spoken language from a given audio sample, which is typically the first step for language processing tasks. Without spoken language detection, speech utterances cannot be analyzed correctly and the grammar rules cannot be applied. As with speech recognition, humans can perform the most accurate language identification.\cite{shi2006importance} Within a few seconds of hearing, people are able to identify if they have prior knowledge of this language. In the other case, people can just make subjective judgements to the similarity of the language they know.
 
 There are several critical applications for spoken language identification, such as international emergency call for urgent occasions and language predefined for intelligent assistants like Siri. 
 Thus, a spoken language identification system should be developed for such cases.
 
 In our project, we explore two different approaches, Phoneme Statistical Analysis (PSA) and Deep Neural Network (DNN), to identifying the language of speech. Five languages, Arabic, Dutch, Korean, Polish and Romanian from Topcoder are used as database. The inputs are 10  seconds audio segment files in type of “wav.” and outputs are the label of the language. In the PSA approach, we extract the phonemes and build a statistical analysis model for each language. While in DNN approach, we transform information from the audio signal to Mel-frequency Cepstral Coefficients (MFCC) and use Convolutional Neural Network (CNN) combined with Recurrent Neural Network (RNN) to train the system.
 
-The report is structured in the following way: In Sect 2 we introduce the system of PSA. The approach with DNN will be shown in Sect. 3. Finally, in Sect. 4 we conclude our work with comparison of both systems. 
+The report is structured in the following way: In Section~\ref{sec:psa} we introduce the system of PSA. The approach with DNN will be shown in Section~\ref{sec:dnn}. Finally, in Section~\ref{sec:conclusion} we conclude our work with comparison of both systems. 
+
+\section{Dataset}
+\label{sec:dataset}
 
 \section{Phoneme Statistical Analysis}
-\subsection{Technique}
+\label{sec:psa}
+\subsection{Techniques}
 The first step in this approach is to convert all audio files in the training set into their corresponding phonemes using the framework CMU Sphinx \cite{lamere2003cmu} and Python. Since the project scope does not allow to create a neutral language model for CMU Sphinx the standard American English model is used. Thus rather low performance of the actual phoneme recognition can be expected \cite{kepuska2017comparing}. However our assumption is that a certain language produces a specific pattern of phonemes even though these phonemes are not the real phonemes of the utterance. Thus the real phonemes are not of interest, just the pattern of (wrong) phonemes a certain language produces in this phoneme recogniser. The output of this step is one text file per language containing the phonemes of one sample in each line.
 
 In the second step, n-grams of the phonemes of each language are computed. \cite{matejka2005phonotactic} used 3-grams to model a language, however this requires more training data than for this project is available. Therefore histograms (1-grams) and 2-grams are considered.
@@ -78,10 +82,10 @@ After training the model, the phonemes of a data sample have to be compared to t
 
 \begin{equation}
 \label{equ:likelihood}
-    \mathcal{L}(\theta | x) = \prod p_{\theta}(x_i)
+    \mathcal{L}(\theta | x) = \prod p_{\theta} (x_i)
 \end{equation}
 
-A second method for comparison with the likelihood is to calculate the Kullback-Leibler Distance between the models histogram and the sample's histogram as shown in equation (\ref{equ:kullback-leibler}) where $P$ is the model's histogram and $Q$ is the sample's histogram.
+A second method for comparison with the likelihood is to calculate the Kullback-Leibler Distance between the models histogram and the sample's histogram as shown in Equation~(\ref{equ:kullback-leibler}) where $P$ is the model's histogram and $Q$ is the sample's histogram.
 
 \begin{equation}
 \label{equ:kullback-leibler}
@@ -90,7 +94,52 @@ A second method for comparison with the likelihood is to calculate the Kullback-
 
 Finally the language with the highest likelihood or with the lowest distance is selected as the estimation.
 
-\subsection{Experiment}
+\subsection{Experiments}
+
+After training 1-gram models, the distance between the language models can give some initial insight if they represent good models for discrimination. Figure~\ref{fig:distance_between_languages} is a plot that shows the Kullback-Leibler distance (Equation~(\ref{equ:kullback-leibler})) between each of the models. For instance it reveals that Arabic and Polish are more different than Korean and Romanian.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{img/kullback-leibler_5languages.pdf}
+    \caption{Kullback-Leibler Distance between the trained models.}
+    \label{fig:distance_between_languages}
+\end{figure}
+
+In the next step the two distance functions are evaluated on the test set. Here both, equation~(\ref{equ:likelihood})~and~(\ref{equ:kullback-leibler}) yield exactly the same confusion matrix, given in Table~\ref{tab:confusion_matrix_psa}. The accuracy is 93.27\,\%.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{ l | r r r r r }
+          & Arabic & Dutch & Korean & Polish & Rom.\\
+\hline
+ Arabic   & 112    & 0     & 0      & 0      & 1\\
+ Dutch    & 3      & 106   & 1      & 0      & 3\\
+ Korean   & 2      & 0     & 99     & 5      & 7\\
+ Polish   & 0      & 0     & 1      & 105    & 7\\
+ Romanian & 0      & 4     & 3      & 1     & 105\\
+\end{tabular}
+\end{center}
+\caption{Confusion Matrix with PSA using Kullback-Leibler distance and Likelihood (both yield the same matrix). }
+\label{tab:confusion_matrix_psa}
+\end{table}
+
+Conducting the same experiments with 2-gram models yields an accuracy of only 55.22\,\%. For example the Polish language model contains 1763 2-grams. However it contains 274 2-grams that are not present and 231 2-grams that only appeared once in the training set. This is an indication that not enough training data was used to get a true realisation of the underlying statistic.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{ l | r r r r r }
+          & Arabic & Dutch & Korean & Polish & Rom.\\
+\hline
+ Arabic   & 87    & 1     & 0      & 2      & 9\\
+ Dutch    & 0      & 100   & 1      & 5      & 0\\
+ Korean   & 2      & 0     & 102     & 1      & 0\\
+ Polish   & 2      & 8     & 1      & 88    & 2\\
+ Romanian & 1      & 0     & 0      & 1     & 101\\
+\end{tabular}
+\end{center}
+\caption{Confusion Matrix with CRNN}
+\label{tab:confusion_matrix_crnn}
+\end{table}
 
 \section{Deep Neural Networks}
 \label{sec:dnn}
@@ -107,27 +156,41 @@ Eventually, the three versions have a relative speeds of $0.9$, $1$ and $1.1$ ti
 
 There was also the possibility that the resulting MFCCs had a resolution too high in time, that would have made the training of the neural network too slow, so we thought to the possibility of reducing the dimensionality in time domain. In fact, that was not the case, with a training time taking around \SI{35}{\milli\second} per step. 
 
-For what concerns the neural networks, we tried two types of them: a more classical \emph{Convolutional Neural Network} (CNN), and a \emph{Convolutional Recurrent Neural Network} (CRNN), that is a CNN with one or more \emph{Long Short Term Memory} layers after the convolutional part and before the fully connected layers.
+For what concerns the neural networks, we tried two types of them: a more classical \emph{Convolutional Neural Network} (CNN), and a \emph{Convolutional Recurrent Neural Network} (CRNN), that is a CNN with one or more \emph{Long Short-term Memory} layers after the convolutional part and before the fully connected layers. Long short-term memory (LSTM) units are units of a recurrent neural network (RNN) . A LSTM unit composed a cell, an input gate, an outpu gate and forget gate. It is well-suited to classifying based on time series data.
 
-In both cases we used three convolutional layers followed each by a maxpooling layer, two dense layers and a dropout layer to reduce overfitting. For the CRNN we added an LSTM layer after the convolutional layers and before the fully connected ones.
+In both cases we used three convolutional layers followed each by a maxpooling layer, two dense layers and a dropout layer to reduce overfitting. For the CRNN we added an LSTM layer after the convolutional layers and before the fully connected ones. 
 
 \subsection{Experiments}
 \label{subsec:dnn-experiments}
 
 \subsubsection{Convolutional Neural Network}
 As a first attempt, we tried to implement a standard CNN with 3 blocks with configuration of neurons 32-32-64, composed each by a Convolutional layer with filters of size $3\times 3$ and a maxpooling layer with stride 2, at the end two fully connected layers with size 64 and 5 for the output and a \emph{dropout} layer between them.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{img/cnn_figure.PNG}
+    \caption{Convolutional Neural Network model}
+    \label{fig:CNN model}
+\end{figure}
 
 We chose the \emph{ReLU} as the activation function and \emph{RMSprop} as optimizer. The loss function is the \emph{categorical cross-entropy}.
 
-After 20 epochs of training over the non-augmented dataset, this model reached an accuracy of SI{89.7}{\percent} on the test set.
-This result is affected by overfitting, as at the last epoch, the accuracy on the training set gets over \SI{98}{\percent}.
+After 20 epochs of training over the non-augmented dataset, this model reached an accuracy of \SI{89.7\%}{\percent} on the test set.
+This result is affected by overfitting, as at the last epoch, the accuracy on the training set gets over \SI{98\%}{\percent}.
 
-To improve it, we implemented data augmentation, as explained in Section \ref{subsec:dnn-tech}. We also split the dataset in three sets: one for training, one for validation
+To improve it, we implemented data augmentation, as explained in Section \ref{subsec:dnn-tech}. We also split the dataset in three sets: one for training, one for validation.
 
 \subsubsection{Convolutional Recurrent Neural Network}
 
-\section{REFERENCES}
-\label{sec:refs}
+To improve the network, based on the CNN structure, we implement a Long Short-Term Memory (LSTM) layer with 64 neurons. 
+The accuracy improve to 93.75\%.
+
+\section{Conclusions}
+\label{sec:conclusion}
+
+In this project we proposed two spoken language identification systems for five languages from different language families. In the PSA system, we extract phonemes and build a statistical model for each language. While in the DNN system, we 
+ 
+%\section{REFERENCES}
+%\label{sec:refs}
 
 
 % References should be produced using the bibtex program from suitable
@@ -135,6 +198,6 @@ To improve it, we implemented data augmentation, as explained in Section \ref{su
 % style file from IEEE produces unsorted bibliography list.
 % -------------------------------------------------------------------------
 \bibliographystyle{IEEEbib}
-\bibliography{strings,refs}
+\bibliography{refs}
 
 \end{document}
