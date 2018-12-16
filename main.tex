@@ -3,7 +3,7 @@
 %          IEEEbib.bst - IEEE bibliography style file.
 % --------------------------------------------------------------------------
 \documentclass{article}
-\usepackage{spconf,amsmath,graphicx}
+\usepackage{spconf,amsmath,graphicx,siunitx,booktabs}
 
 % Example definitions.
 % --------------------
@@ -174,7 +174,7 @@ As a first attempt, we tried to implement a standard CNN with 3 blocks with conf
 
 We chose the \emph{ReLU} as the activation function and \emph{RMSprop} as optimizer. The loss function is the \emph{categorical cross-entropy}. The dataset has been split between a training set and a test set respectively equal to the \SI{70}{\percent} and \SI{30}{\percent}.
 
-After 20 epochs of training over the non-augmented dataset, this model reached an accuracy of SI{89.7}{\percent} on the test set.
+After 20 epochs of training over the non-augmented dataset, this model reached an accuracy of \SI{89.7}{\percent} on the test set.
 Dispite the dropout layer, this result is affected by overfitting. At the last epoch in fact, the accuracy on the training set gets over \SI{98}{\percent}.
 
 To improve it, we implemented data augmentation, as explained in Section \ref{subsec:dnn-tech}. We also split the dataset into three sets: one for training, one for validation and one for the testing phase with a proporttion of \SI{56}{\percent}, \SI{14}{\percent}  and \SI{30}{\percent}. We used a technique to save the weights of the best network according to the value of the loss function on the validation set. We later use the best model for the evaluation phase.
@@ -195,13 +195,14 @@ In our case this amounts to less then 64 samples, which should not impact the ov
 All the obtained results are reported in \tablename~\ref{tab:dnn-acc-comp}. The confusion matrix for the CRNN is in \tablename~\ref{tab:confusion_matrix_crnn}.
 
 \begin{table}
+  \centering
   \begin{tabular}{lcr}
     \toprule
-    Architecture & Data augmentation & Accuracy (si{\percent}) \\
+    Architecture & Data augmentation & Accuracy (\si{\percent}) \\
     \midrule
     Convolutional & No & 89.7 \\
     Convolutional & Yes & 95.17 \\
-    Convolutional Recurrent & Yes & 93.75 \\
+    Conv. Recurrent & Yes & 93.75 \\
     \bottomrule
   \end{tabular}
   \caption{Comparison of accuracy between different networks}\label{tab:dnn-acc-comp}
