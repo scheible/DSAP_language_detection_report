@@ -187,7 +187,25 @@ From the confusion matrix results that our network is very good at detecting Kor
 To improve the network, based on the CNN structure, we implement a Long Short-Term Memory (LSTM) layer with 64 neurons. The accuracy improve to \SI{93.75}{\percent}
 
 To improve the network, based on the CNN structure, we implement a Long Short-Term Memory (LSTM) layer with 64 neurons. 
-The accuracy improve to 93.75\%.
+The accuracy improve to 93.75\%, training the network on the augmented dataset.
+Because of the network architecture and the software implementation we have to discard a small part of the sets. It is a number of samples less than the number of elements in a minibatch and is distributed among all the languages.
+
+In our case this amounts to less then 64 samples, which should not impact the overall performance of the network.
+
+All the obtained results are reported in \tablename~\ref{tab:dnn-acc-comp}. The confusion matrix for the CRNN is in \tablename~\ref{tab:confusion_matrix_crnn}.
+
+\begin{table}
+  \begin{tabular}{lcr}
+    \toprule
+    Architecture & Data augmentation & Accuracy (si{\percent}) \\
+    \midrule
+    Convolutional & No & 89.7 \\
+    Convolutional & Yes & 95.17 \\
+    Convolutional Recurrent & Yes & 93.75 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Comparison of accuracy between different networks}\label{tab:dnn-acc-comp}
+\end{table}
 
 \section{Conclusions}
 \label{sec:conclusion}
