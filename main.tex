@@ -3,7 +3,8 @@
 %          IEEEbib.bst - IEEE bibliography style file.
 % --------------------------------------------------------------------------
 \documentclass{article}
-\usepackage{spconf,amsmath,graphicx}
+
+\usepackage{spconf,amsmath,graphicx,siunitx,booktabs}
 \usepackage{varioref}
 
 % Example definitions.
@@ -18,7 +19,7 @@
 % Single address.
 % ---------------
 \name{Quentin Deleuil, Gianmarco Garrisi, Qianyun Hu, Patrik Scheible \thanks{Thanks to XYZ agency for funding.}}
-\address{s212260@studenti.polito.it, patrikscheible@posteo.net, }
+\address{quentin.deleuil@gmail.com, s212260@studenti.polito.it, patrikscheible@posteo.net, }
 %
 % For example:
 % ------------
@@ -176,20 +177,39 @@ As a first attempt, we tried to implement a standard CNN with 3 blocks with conf
 
 We chose the \emph{ReLU} as the activation function and \emph{RMSprop} as optimizer. The loss function is the \emph{categorical cross-entropy}. The dataset has been split between a training set and a test set respectively equal to the \SI{70}{\percent} and \SI{30}{\percent}.
 
-After 20 epochs of training over the non-augmented dataset, this model reached an accuracy of SI{89.7\%}{\percent} on the test set.
-Dispite the dropout layer, this result is affected by overfitting. At the last epoch in fact, the accuracy on the training set gets over \SI{98\%}{\percent}.
+After 20 epochs of training over the non-augmented dataset, this model reached an accuracy of \SI{89.7}{\percent} on the test set.
+Dispite the dropout layer, this result is affected by overfitting. At the last epoch in fact, the accuracy on the training set gets over \SI{98}{\percent}.
 
-To improve it, we implemented data augmentation, as explained in Section \ref{subsec:dnn-tech}. We also split the dataset into three sets: one for training, one for validation and one for the testing phase with a proporttion of \SI{56\%}{\percent}, \SI{14\%}{\percent}  and \SI{30\%}{\percent}. We used a technique to save the weights of the best network according to the value of the loss function on the validation set. We later use the best model for the evaluation phase.
+To improve it, we implemented data augmentation, as explained in Section \ref{subsec:dnn-tech}. We also split the dataset into three sets: one for training, one for validation and one for the testing phase with a proporttion of \SI{56}{\percent}, \SI{14}{\percent}  and \SI{30}{\percent}. We used a technique to save the weights of the best network according to the value of the loss function on the validation set. We later use the best model for the evaluation phase.
 
-We were able to train the network for 30 epochs without overfitting reaching an accuracy of over \SI{95\%}{\percent} on the validation set and  on the test set.
+We were able to train the network for 30 epochs without overfitting reaching an accuracy of over \SI{95}{\percent} on the validation set and  on the test set.
 
 From the confusion matrix results that our network is very good at detecting Korean and Romanian.
 
 \subsubsection{Convolutional Recurrent Neural Network}
-To improve the network, based on the CNN structure, we implement a Long Short-Term Memory (LSTM) layer with 64 neurons. The accuracy improve to \SI{93.75\%}{\percent}
+To improve the network, based on the CNN structure, we implement a Long Short-Term Memory (LSTM) layer with 64 neurons. The accuracy improve to \SI{93.75}{\percent}
 
 To improve the network, based on the CNN structure, we implement a Long Short-Term Memory (LSTM) layer with 64 neurons. 
-The accuracy improve to 93.75\%.
+The accuracy improve to \SI{93.75}{\percent}, training the network on the augmented dataset.
+Because of the network architecture and the software implementation we have to discard a small part of the sets. It is a number of samples less than the number of elements in a minibatch and is distributed among all the languages.
+
+In our case this amounts to less then 64 samples, which should not impact the overall performance of the network.
+
+All the obtained results are reported in \tablename~\ref{tab:dnn-acc-comp}. The confusion matrix for the CRNN is in \tablename~\ref{tab:confusion_matrix_crnn}.
+
+\begin{table}
+  \centering
+  \begin{tabular}{lcr}
+    \toprule
+    Architecture & Data augmentation & Accuracy (\si{\percent}) \\
+    \midrule
+    Convolutional & No & 89.7 \\
+    Convolutional & Yes & 95.17 \\
+    Conv. Recurrent & Yes & 93.75 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Comparison of accuracy between different networks}\label{tab:dnn-acc-comp}
+\end{table}
 
 \section{Comparision of the two Systems}
 \label{sec:comparision}
