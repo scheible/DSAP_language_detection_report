@@ -45,17 +45,12 @@
 \maketitle
 %
 \begin{abstract}
-The abstract should appear at the top of the left-hand column of text, about
-0.5 inch (12 mm) below the title area and no more than 3.125 inches (80 mm) in
-length.  Leave a 0.5 inch (12 mm) space between the end of the abstract and the
-beginning of the main text.  The abstract should contain about 100 to 150
-words, and should be identical to the abstract text submitted electronically
-along with the paper cover sheet.  All manuscripts must be in English, printed
-in black ink.
+
 \end{abstract}
-%
+In this project, we explore two techniques to identify spoken language. For one system, we extract the phonemes from audio files and use Phonemes Statistical Analysis(PSA) approach to classify languages. For the other, audios files are transformed into Mel-frequency Cepstral Coefficients (MFCC) images. And we construct a Deep Neural Network (DNN) to identify languages. We used Arabic, Dutch, Korean, Polish and Romanian as languages to recognise. Both systems reach a higher accuracy than 93\%. 
+
 \begin{keywords}
-Language Identification, Phonemes, CMUSphinx,
+Language Identification, Phonemes, CMUSphinx, Deep Neural network
 \end{keywords}
 %
 \section{Introduction}
@@ -67,7 +62,7 @@ Thus, a spoken language identification system should be developed for such cases
 
 In our project, we explore two different approaches, Phoneme Statistical Analysis (PSA) and Deep Neural Network (DNN), to identifying the language of speech. In the PSA approach, we extract the phonemes and build a statistical analysis model for each language. While in DNN approach, we transform information from the audio signal to Mel-frequency Cepstral Coefficients (MFCC) and use Convolutional Neural Network (CNN) combined with Recurrent Neural Network (RNN) to train the system.
 
-The report is structured in the following way: In Section~\ref{sec:psa} we introduce the system of PSA. The approach with DNN will be shown in Section~\ref{sec:dnn}. Finally, in Section~\ref{sec:conclusion} we conclude our work with comparison of both systems. 
+The report is structured in the following way: In Section~\ref{sec:psa} we introduce the system of PSA. The approach with DNN will be shown in Section~\ref{sec:dnn}. In Section~\ref{sec:comparision} we compare the systems and suggest a method of combining them and finally show our conclusions in Section~\ref{sec:conclusion}. 
 
 \section{Dataset}
 \label{sec:dataset}
@@ -191,15 +186,26 @@ To improve the network, based on the CNN structure, we implement a Long Short-Te
 To improve the network, based on the CNN structure, we implement a Long Short-Term Memory (LSTM) layer with 64 neurons. 
 The accuracy improve to 93.75\%.
 
-\section{Comparision of the two Systems}
+\section{Comparison of the two Systems}
 \label{sec:comparision}
 
+Both systems show a similar performance on the test set, no systems proofs to be superior over the other. However, comparing the diagonals of the confusion matrices for both systems in Table~\ref{tab:confusion_matrix_psa} and Table~\ref{tab:confusion_matrix_crnn} we see that each system has languages it works better with. For instance Korean has 110 true positives in the CRNN and only 99 true positives in the PSA.
+
+Considering that when we input a sample into each system, the result are 5 likelihoods. To further improve the performance a weighted average between these likelihoods can be applied. Therefore, first the likelihoods have to be normalised and then the system that performs better on the test data has to get the higher weight. This yields five final likelihoods from which the highest is the estimated language.
+
+To test this approach, it is necessary to use a new test set, since the weights are based on the original test set. This is left as future work, since the data basis available for this project is not large enough.
 
 \section{Conclusions}
 \label{sec:conclusion}
 
-In this project we propose two spoken language identification systems for five languages from different language families. In the PSA system, we extract phonemes and build a statistical model for each language. While in the DNN system, we first convert the audio domain into image domain with MFCC features. Then we propose a CNN structure with data augmentation and a CRNN structure with a LSTM layer based on CNN.We perform several experiments on the dataset to show the high performance of both models.
- 
+In this project we propose two spoken language identification systems for five languages from different language families. In the PSA system, we extract phonemes and build a statistical model for each language. While in the DNN system, we first convert the audio domain into image domain with MFCC features. Then we propose a CNN structure with data augmentation and a CRNN structure with a LSTM layer based on CNN. 
+We could show that performing PSA shows almost the same performance as a DNN. (CANG)
+
+Also a data set is not large enough to apply 2-gram models, therefore with more data a even higher performance in the PSA approach can be expected. Using a phoneme recognizer that is known to only exhibit low performance (using wrong language models) has proved to be still a useful tool to language identification.
+
+For the DNN system, a simple structure predict a high accuracy due to the preprocessing of MFCC. The accuracy improved after data augmentation of training set. Other network structures can be tried to further improve the performance.
+
+Finally, we can try to combine both systems to get the best of both. One way this can be done is looking at the results and assign weights to the predictions of both systems.
 %\section{REFERENCES}
 %\label{sec:refs}
 
